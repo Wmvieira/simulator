@@ -1,19 +1,15 @@
-import { createSample } from "../adapters/controllers/createSampleController";
 import { runSimulation } from "../adapters/controllers/queueSimulatorController";
-import { sampleGeneration } from "../configs/sampleGeneration";
-import { outputResultFilePath, outputSampleFilePath } from "../configs/sdout";
+import { outputResultFilePath, outputSampleFilePath } from "../configs/outputs";
 import { writeCSV } from "../utils/csvUtils";
 
 async function main() {
   try {
-    const sample = await createSample();
+    const { results, samples } = await runSimulation();
 
-    const result = runSimulation(sample);
+    await writeCSV(outputSampleFilePath, samples);
+    await writeCSV(outputResultFilePath, results);
 
-    await writeCSV(outputResultFilePath, [result]);
-    await writeCSV(outputSampleFilePath, [sample]);
-
-    console.log(result);
+    console.log(results);
 
     console.log(
       "Simulation completed successfully. Results written to:",

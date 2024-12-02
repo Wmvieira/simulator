@@ -1,5 +1,5 @@
-import { sampleGeneration } from "../configs/sampleGeneration";
-import { inputInterArrivalTimes, inputServiceTime } from "../configs/sdin";
+import { sampleRandomGeneration } from "../configs/sampleRandomGeneration";
+import { inputInterArrivalTimes, inputServiceTime } from "../configs/inputs";
 import { Sample } from "../entities/sample";
 import { readCSV } from "../utils/csvUtils";
 
@@ -18,13 +18,17 @@ function getRandomValueFromDistribution(data: number[]): number {
   return data.length;
 }
 
-export async function generateSample(): Promise<Sample> {
-  const sample: Sample = { serviceTime: [], interArrivalTimes: [] };
+export async function generateSample(iterationId: number): Promise<Sample> {
+  const sample: Sample = {
+    iterationId,
+    serviceTime: [],
+    interArrivalTimes: [],
+  };
 
   const tcData = await readCSV(inputInterArrivalTimes);
   const tsData = await readCSV(inputServiceTime);
 
-  if (sampleGeneration) {
+  if (sampleRandomGeneration) {
     const tcDistribution = tcData.map(Number);
     const tsDistribution = tsData.map(Number);
 

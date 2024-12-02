@@ -2,7 +2,10 @@ import { employees } from "../configs/employees";
 import { Customer } from "../entities/customer";
 import { SimulationResult } from "../entities/simulationResult";
 
-export function simulateQueue(customers: Customer[]): SimulationResult {
+export function simulateQueue(
+  customers: Customer[],
+  iterationId: number
+): SimulationResult {
   const serverEndTimes = Array(employees).fill(0);
   let totalWaitTime = 0;
   let totalProcessed = 0;
@@ -50,6 +53,7 @@ export function simulateQueue(customers: Customer[]): SimulationResult {
   const averageQueueLength = totalQueueLength / totalTimeUnits;
 
   return {
+    iterationId,
     averageWaitTime: totalWaitTime / totalProcessed,
     utilizationRate,
     totalProcessed,

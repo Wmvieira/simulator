@@ -1,66 +1,57 @@
-import { employees } from "../configs/employees";
 import { Customer } from "../entities/customer";
-import { SimulationResult } from "../entities/simulationResult";
 
-export function simulateQueue(
-  customers: Customer[],
-  iterationId: number
-): SimulationResult {
-  const serverEndTimes = Array(employees).fill(0);
+export function simulateQueue(customers: Customer[], iterationId: number) {
+  let employeeAvailableAt = 0;
+
   let totalWaitTime = 0;
-  let totalProcessed = 0;
-  let totalQueueLength = 0;
-  let totalTimeUnits = 0;
+  let totalQueueTime = 0;
+  let totalServiceTime = 0;
+  let totalTime = 0;
   let maxQueueLength = 0;
-  const idleTimes = Array(employees).fill(0);
+  let queueLength = 0;
 
-  const queue: Customer[] = [];
+  const waitTimes: number[] = [];
+  const queueTimes: number[] = [];
 
-  customers.forEach((customer) => {
-    queue.push(customer);
+  customers.forEach((customer, index) => {
+    const currentTime = customer.arrivalTime;
 
-    maxQueueLength = Math.max(maxQueueLength, queue.length);
-
-    const nextAvailableServer = serverEndTimes.indexOf(
-      Math.min(...serverEndTimes)
-    );
-    const startServiceTime = Math.max(
-      customer.arrivalTime,
-      serverEndTimes[nextAvailableServer]
-    );
-    const waitTime = Math.max(0, startServiceTime - customer.arrivalTime);
+    const waitTime = Math.max(0, employeeAvailableAt - currentTime);
     totalWaitTime += waitTime;
 
-    if (serverEndTimes[nextAvailableServer] < customer.arrivalTime) {
-      idleTimes[nextAvailableServer] +=
-        customer.arrivalTime - serverEndTimes[nextAvailableServer];
-    }
+    employeeAvailableAt = currentTime + waitTime + customer.serviceTime;
 
-    serverEndTimes[nextAvailableServer] =
-      startServiceTime + customer.serviceTime;
-    totalProcessed++;
+    const queueTime = waitTime + customer.serviceTime;
+    totalQueueTime += queueTime;
 
-    totalQueueLength += queue.length;
-    totalTimeUnits++;
-    queue.shift();
+    totalServiceTime += customer.serviceTime;
+
+    queueLength = customers.filter(
+      (c) => c.arrivalTime < employeeAvailableAt && c.arrivalTime >= currentTime
+    ).length;
+
+    maxQueueLength = Math.max(maxQueueLength, queueLength);
+
+    waitTimes.push(waitTime);
+    queueTimes.push(queueTime);
   });
 
-  const totalTime = Math.max(...serverEndTimes);
-  const utilizationRate =
-    serverEndTimes.reduce((sum, endTime) => sum + endTime, 0) /
-    (employees * totalTime);
+  totalTime = employeeAvailableAt - customers[0].arrivalTime;
 
-  const averageQueueLength = totalQueueLength / totalTimeUnits;
+  const totalProcessed = customers.length;
+  const averageWaitTime = totalWaitTime / totalProcessed;
+  const averageQueueLength = totalQueueTime / totalTime;
+  const utilizationRate = (totalServiceTime / totalTime) * 100;
 
   return {
     iterationId,
-    averageWaitTime: totalWaitTime / totalProcessed,
+    averageWaitTime,
     utilizationRate,
     totalProcessed,
     totalTime,
     totalWaitTime,
+    totalQueueTime,
     averageQueueLength,
     maxQueueLength,
-    idleTimes,
   };
 }

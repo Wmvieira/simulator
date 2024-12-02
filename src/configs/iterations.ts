@@ -1,1 +1,1 @@
-export const iterations: number = 10;
+export const iterations: number = 1;

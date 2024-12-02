@@ -13,7 +13,12 @@ export async function runSimulation(): Promise<{
   const samples: Sample[] = [];
 
   for (let i = 0; i < iterations; i++) {
-    const sample = await createSample(i);
+    // const sample = await createSample(i);
+    const sample: Sample = {
+      iterationId: i,
+      serviceTime: [5, 2, 3, 3, 4],
+      interArrivalTimes: [1, 2, 1, 2, 5],
+    };
     const customers = generateCustomers(sample);
     const simulation = simulateQueue(customers, i);
 

@@ -5,7 +5,8 @@ export type SimulationResult = {
   totalProcessed: number;
   totalTime: number;
   totalWaitTime: number;
+  totalQueueTime: number;
   averageQueueLength: number;
   maxQueueLength: number;
-  idleTimes: number[];
+  // idleTimes: number[];
 };

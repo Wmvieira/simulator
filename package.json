@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm start",
+    "requirements": "npm install -g typescript && npm install",
     "simulator": "ts-node src/app/index.ts"
   },
   "author": "",

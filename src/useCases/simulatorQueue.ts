@@ -1,47 +1,70 @@
+import { employees } from "../configs/employees";
 import { Customer } from "../entities/customer";
+import { SimulationResult } from "../entities/simulationResult";
 
-export function simulateQueue(customers: Customer[], iterationId: number) {
-  let employeeAvailableAt = 0;
-
-  let totalWaitTime = 0;
-  let totalQueueTime = 0;
-  let totalServiceTime = 0;
-  let totalTime = 0;
-  let maxQueueLength = 0;
-  let queueLength = 0;
+export function simulateQueue(
+  customers: Customer[],
+  iterationId: number
+): SimulationResult {
+  const employeeAvailableAt: number[] = Array(employees).fill(0); // Disponibilidade inicial de cada funcionário
+  let totalWaitTime = 0; // Tempo total de espera
+  let totalQueueTime = 0; // Tempo total na fila (espera + atendimento)
+  let totalServiceTime = 0; // Tempo total de serviço
+  let totalTime = 0; // Tempo total da simulação
 
   const waitTimes: number[] = [];
   const queueTimes: number[] = [];
 
-  customers.forEach((customer, index) => {
+  const queue: Customer[] = [];
+
+  customers.forEach((customer) => {
     const currentTime = customer.arrivalTime;
 
-    const waitTime = Math.max(0, employeeAvailableAt - currentTime);
+    // Remove clientes atendidos que já saíram da fila
+    while (
+      queue.length > 0 &&
+      queue[0].arrivalTime + queue[0].serviceTime <= currentTime
+    ) {
+      queue.shift();
+    }
+
+    // Determina o funcionário mais cedo disponível
+    const availableEmployeeIndex = employeeAvailableAt.indexOf(
+      Math.min(...employeeAvailableAt)
+    );
+
+    // Calcula o tempo de espera para o cliente atual
+    const waitTime = Math.max(
+      0,
+      employeeAvailableAt[availableEmployeeIndex] - currentTime
+    );
     totalWaitTime += waitTime;
+    waitTimes.push(waitTime);
 
-    employeeAvailableAt = currentTime + waitTime + customer.serviceTime;
+    // Atualiza o tempo em que o funcionário estará disponível
+    employeeAvailableAt[availableEmployeeIndex] =
+      currentTime + waitTime + customer.serviceTime;
 
+    // Tempo na fila (espera + atendimento)
     const queueTime = waitTime + customer.serviceTime;
     totalQueueTime += queueTime;
+    queueTimes.push(queueTime);
 
+    // Tempo total de serviço
     totalServiceTime += customer.serviceTime;
 
-    queueLength = customers.filter(
-      (c) => c.arrivalTime < employeeAvailableAt && c.arrivalTime >= currentTime
-    ).length;
-
-    maxQueueLength = Math.max(maxQueueLength, queueLength);
-
-    waitTimes.push(waitTime);
-    queueTimes.push(queueTime);
+    // Adiciona cliente atual à fila
+    queue.push(customer);
   });
 
-  totalTime = employeeAvailableAt - customers[0].arrivalTime;
+  // Tempo total da simulação
+  totalTime = Math.max(...employeeAvailableAt) - customers[0].arrivalTime;
 
+  // Métricas finais
   const totalProcessed = customers.length;
   const averageWaitTime = totalWaitTime / totalProcessed;
   const averageQueueLength = totalQueueTime / totalTime;
-  const utilizationRate = (totalServiceTime / totalTime) * 100;
+  const utilizationRate = (totalServiceTime / (totalTime * employees)) * 100;
 
   return {
     iterationId,
@@ -52,6 +75,5 @@ export function simulateQueue(customers: Customer[], iterationId: number) {
     totalWaitTime,
     totalQueueTime,
     averageQueueLength,
-    maxQueueLength,
   };
 }

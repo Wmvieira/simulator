@@ -7,6 +7,4 @@ export type SimulationResult = {
   totalWaitTime: number;
   totalQueueTime: number;
   averageQueueLength: number;
-  maxQueueLength: number;
-  // idleTimes: number[];
 };

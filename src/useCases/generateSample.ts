@@ -4,18 +4,8 @@ import { Sample } from "../entities/sample";
 import { readCSV } from "../utils/csvUtils";
 
 function getRandomValueFromDistribution(data: number[]): number {
-  const total = data.reduce((acc, val) => acc + val, 0);
-  const random = Math.random() * total;
-  let cumulative = 0;
-
-  for (let i = 0; i < data.length; i++) {
-    cumulative += data[i];
-    if (random < cumulative) {
-      return i;
-    }
-  }
-
-  return data.length;
+  const randomIndex = Math.floor(Math.random() * data.length);
+  return data[randomIndex];
 }
 
 export async function generateSample(iterationId: number): Promise<Sample> {

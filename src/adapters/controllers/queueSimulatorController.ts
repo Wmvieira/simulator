@@ -1,6 +1,9 @@
 import { iterations } from "../../configs/iterations";
 import { Sample } from "../../entities/sample";
-import { SimulationResult } from "../../entities/simulationResult";
+import {
+  CustomerResults,
+  SimulationResult,
+} from "../../entities/simulationResult";
 import { generateCustomers } from "../../useCases/generateCustomer";
 import { simulateQueue } from "../../useCases/simulatorQueue";
 import { createSample } from "./createSampleController";
@@ -8,19 +11,25 @@ import { createSample } from "./createSampleController";
 export async function runSimulation(): Promise<{
   results: SimulationResult[];
   samples: Sample[];
+  customers: CustomerResults[];
 }> {
   const results: SimulationResult[] = [];
   const samples: Sample[] = [];
+  const customersResults: CustomerResults[] = [];
 
   for (let i = 0; i < iterations; i++) {
     const sample = await createSample(i);
-    
+
     const customers = generateCustomers(sample);
-    const simulation = simulateQueue(customers, i);
+    const { result: simulation, customers: customersResult } = simulateQueue(
+      customers,
+      i
+    );
 
     results.push(simulation);
     samples.push(sample);
+    customersResults.push(customersResult);
   }
 
-  return { results, samples };
+  return { results, samples, customers: customersResults };
 }

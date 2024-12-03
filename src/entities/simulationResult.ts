@@ -1,3 +1,5 @@
+import { CustomerEnded } from "./customer";
+
 export type SimulationResult = {
   iterationId: number;
   averageWaitTime: number;
@@ -7,4 +9,9 @@ export type SimulationResult = {
   totalWaitTime: number;
   totalQueueTime: number;
   averageQueueLength: number;
+};
+
+export type CustomerResults = {
+  iterationId: number;
+  curtomers: CustomerEnded[];
 };

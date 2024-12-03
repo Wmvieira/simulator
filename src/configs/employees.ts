@@ -1,1 +1,1 @@
-export const employees = 3;
+export const employees = 2;
